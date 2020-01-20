@@ -27,12 +27,31 @@ static int lept_parse_literal(lept_context* c, lept_value* v,const char* literal
 }
 
 static int lept_parse_number(lept_context* c, lept_value* v) {
-    char* end;
-    /* \TODO validate number */
-    v->n = strtod(c->json, &end);
-    if (c->json == end)
+    const char* p=c->json;
+    if(*p=='-')
+        ++p;
+    if(*p=='0')
+        ++p;
+    else{
+        if(!ISDIGIT1TO9(*p)) return LEPT_PARSE_INVAILID_VALUE;
+        for(++p;ISDIGIT(*p);++p) ;
+    }
+    if(*P=='.'){
+        ++p;
+        if(!ISDIGIT(*p)) return LEPT_PARSE_INVAILID_VALUE;
+        for(++p;ISDIGIT(*p);++p) ;
+    }
+    if(*p=='e'||*P=='E'){
+        ++p;
+        if(*p=='+'||*p=='-') ++p;
+        if(!ISDIGIT(*p)) return LEPT_PARSE_INVAILID_VALUE;
+        for(++p;ISDIGIT(*p);++p) ;
+        
+        
+    v->n = strtod(c->json, &p);
+    if (c->json == p)
         return LEPT_PARSE_INVALID_VALUE;
-    c->json = end;
+    c->json =p;
     v->type = LEPT_NUMBER;
     return LEPT_PARSE_OK;
 }
